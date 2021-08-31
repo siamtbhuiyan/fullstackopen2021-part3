@@ -63,6 +63,19 @@ app.post("/api/persons", (request, response) => {
     number: data.number,
   };
 
+  if (!data.name || data.name === "") {
+    return response.status(400).json({ error: "Enter name" });
+  }
+  if (!data.number || data.number === "") {
+    return response.status(400).json({ error: "Enter number" });
+  }
+
+  const same = persons.find((p) => p.name === data.name);
+
+  if (same) {
+    return response.status(400).json({ error: "name must be unique" });
+  }
+
   persons = persons.concat(person);
 
   return response.json(persons);
