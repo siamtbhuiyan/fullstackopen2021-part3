@@ -50,6 +50,23 @@ app.delete("/api/persons/:id", (request, response) => {
   return response.status(204).end();
 });
 
+const generateRandomId = () => {
+  const id = Math.floor(Math.random() * 10000);
+  return id;
+};
+
+app.post("/api/persons", (request, response) => {
+  const data = request.body;
+  const person = {
+    id: generateRandomId(),
+    name: data.name,
+    number: data.number,
+  };
+
+  persons = persons.concat(person);
+
+  return response.json(persons);
+});
 app.get("/info", (request, response) => {
   const date = new Date();
   response.send(
