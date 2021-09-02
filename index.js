@@ -5,24 +5,7 @@ const morgan = require("morgan");
 
 app.use(express.json());
 
-morgan.token("data", function (req, res) {
-  return JSON.stringify(res.req.body);
-});
-
-app.use(
-  morgan((tokens, req, res) => {
-    return [
-      tokens.method(req, res),
-      tokens.url(req, res),
-      tokens.status(req, res),
-      tokens.res(req, res, "content-length"),
-      "-",
-      tokens["response-time"](req, res),
-      "ms",
-      tokens.data(req, res),
-    ].join(" ");
-  })
-);
+app.use(morgan("tiny"));
 
 let persons = [
   {
@@ -71,6 +54,32 @@ app.delete("/api/persons/:id", (request, response) => {
   return response.status(204).end();
 });
 
+app.get("/info", (request, response) => {
+  const date = new Date();
+  response.send(
+    `Phonebook has info for ${persons.length} people <br><br> ${date}`
+  );
+});
+
+morgan.token("data", function (req, res) {
+  return JSON.stringify(res.req.body);
+});
+
+app.use(
+  morgan((tokens, req, res) => {
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, "content-length"),
+      "-",
+      tokens["response-time"](req, res),
+      "ms",
+      tokens.data(req, res),
+    ].join(" ");
+  })
+);
+
 const generateRandomId = () => {
   const id = Math.floor(Math.random() * 10000);
   return id;
@@ -100,12 +109,6 @@ app.post("/api/persons", (request, response) => {
   persons = persons.concat(person);
 
   return response.json(persons);
-});
-app.get("/info", (request, response) => {
-  const date = new Date();
-  response.send(
-    `Phonebook has info for ${persons.length} people <br><br> ${date}`
-  );
 });
 
 const PORT = 3001;
