@@ -2,9 +2,11 @@ const { response } = require("express");
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const cors = require("cors");
 
+app.use(express.static("build"));
 app.use(express.json());
-
+app.use(cors());
 app.use(morgan("tiny"));
 
 let persons = [
@@ -106,12 +108,13 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "name must be unique" });
   }
 
+  console.log(persons);
   persons = persons.concat(person);
-
+  console.log(persons);
   return response.json(persons);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
