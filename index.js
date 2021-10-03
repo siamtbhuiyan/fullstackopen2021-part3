@@ -61,13 +61,6 @@ app.use(
 app.post("/api/persons", (request, response) => {
   const data = request.body;
 
-  const person = new Person({
-    name: data.name,
-    number: data.number,
-    date: new Date(),
-  });
-  console.log(person);
-
   if (!data.name || data.name === "") {
     return response.status(400).json({ error: "Enter name" });
   }
@@ -75,14 +68,16 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "Enter number" });
   }
 
-  const same = Person.find({}).then((p) => p.name === data.name);
-
-  if (same) {
-    return response.status(400).json({ error: "name must be unique" });
-  }
+  const person = new Person({
+    name: data.name,
+    number: data.number,
+    date: new Date(),
+  });
+  const test = JSON.stringify(person);
+  console.log(test);
 
   person.save().then((result) => {
-    response.json(result);
+    response.send(result);
   });
 });
 
