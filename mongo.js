@@ -11,10 +11,8 @@ const url = `mongodb+srv://Siam:${password}@cluster0.lb5pf.mongodb.net/phonebook
 mongoose.connect(url);
 
 const personSchema = new mongoose.Schema({
-  person: {
-    name: String,
-    number: String,
-  },
+  name: String,
+  number: String,
   date: Date,
 });
 
@@ -30,17 +28,13 @@ if (process.argv.length === 3) {
   });
 } else if (process.argv.length > 3) {
   const person = new Person({
-    person: {
-      name: process.argv[3],
-      number: process.argv[4],
-    },
+    name: process.argv[3],
+    number: process.argv[4],
     date: new Date(),
   });
 
   person.save().then((result) => {
-    console.log(
-      `added ${result.person.name} ${result.person.number} to phonebook`
-    );
+    console.log(`added ${result.name} ${result.number} to phonebook`);
     mongoose.connection.close();
   });
 }

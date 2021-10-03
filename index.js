@@ -1,4 +1,4 @@
-const { response } = require("express");
+const Person = require("./models/person.js");
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
@@ -9,58 +9,34 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("tiny"));
 
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
-
 app.get("/", (request, response) => {
   return response.send("Hello");
 });
 
 app.get("/api/persons", (request, response) => {
-  return response.json(persons);
+  Person.find({}).then((people) => {
+    response.json(people);
+  });
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((p) => p.id === id);
-  if (person) {
-    return response.json(person);
-  } else {
-    return response.status(404).end();
-  }
+  Person.findById(request.params.id).then((people) => {
+    response.json(people);
+  });
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((p) => p.id !== id);
-  return response.status(204).end();
+  Person.deleteOne({ id: request.params.id }).then((persons) => {
+    response.json(persons);
+  });
 });
 
 app.get("/info", (request, response) => {
   const date = new Date();
-  response.send(
-    `Phonebook has info for ${persons.length} people <br><br> ${date}`
-  );
+
+  Person.countDocuments({}, (error, count) => {
+    response.send(`Phonebook has info for ${count} people <br> <br> ${date}`);
+  });
 });
 
 morgan.token("data", function (req, res) {
@@ -82,18 +58,15 @@ app.use(
   })
 );
 
-const generateRandomId = () => {
-  const id = Math.floor(Math.random() * 10000);
-  return id;
-};
-
 app.post("/api/persons", (request, response) => {
   const data = request.body;
-  const person = {
-    id: generateRandomId(),
+
+  const person = new Person({
     name: data.name,
     number: data.number,
-  };
+    date: new Date(),
+  });
+  console.log(person);
 
   if (!data.name || data.name === "") {
     return response.status(400).json({ error: "Enter name" });
@@ -102,16 +75,15 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "Enter number" });
   }
 
-  const same = persons.find((p) => p.name === data.name);
+  const same = Person.find({}).then((p) => p.name === data.name);
 
   if (same) {
     return response.status(400).json({ error: "name must be unique" });
   }
 
-  console.log(persons);
-  persons = persons.concat(person);
-  console.log(persons);
-  return response.json(persons);
+  person.save().then((result) => {
+    response.json(result);
+  });
 });
 
 const PORT = process.env.PORT || 3001;
