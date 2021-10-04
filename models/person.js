@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 
 const url =
   "mongodb+srv://Siam:chhoaapi@cluster0.lb5pf.mongodb.net/phonebook-app?retryWrites=true&w=majority";
@@ -15,10 +16,15 @@ mongoose
   });
 
 const personSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    unique: true,
+  },
   number: String,
   date: Date,
 });
+
+personSchema.plugin(uniqueValidator);
 
 personSchema.set("toJSON", {
   transform: (document, returnObject) => {

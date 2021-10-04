@@ -84,7 +84,7 @@ app.use(
   })
 );
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const data = request.body;
 
   if (!data.name || data.name === "") {
@@ -120,6 +120,8 @@ const errorHanler = (error, request, response, next) => {
   console.error(error.message);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).send({ error: error.message });
   }
 
   next(error);
