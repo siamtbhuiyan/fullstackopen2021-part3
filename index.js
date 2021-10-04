@@ -59,7 +59,9 @@ app.get("/info", (request, response) => {
   const date = new Date();
 
   Person.countDocuments({}, (error, count) => {
-    response.send(`Phonebook has info for ${count} people <br> <br> ${date}`);
+    response.send(
+      `Phonebook has info for ${count} people <br> <br> <br> ${date}`
+    );
   });
 });
 
