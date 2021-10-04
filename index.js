@@ -14,16 +14,20 @@ app.get("/", (request, response) => {
   return response.send("Hello");
 });
 
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((people) => {
-    response.json(people);
-  });
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((people) => {
+      response.json(people);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id).then((people) => {
-    response.json(people);
-  });
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((people) => {
+      response.json(people);
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -81,9 +85,12 @@ app.post("/api/persons", (request, response) => {
   const test = JSON.stringify(person);
   console.log(test);
 
-  person.save().then((result) => {
-    response.send(result);
-  });
+  person
+    .save()
+    .then((result) => {
+      response.send(result);
+    })
+    .catch((error) => next(error));
 });
 
 const unKnownEndPoint = (request, response) => {
@@ -91,6 +98,17 @@ const unKnownEndPoint = (request, response) => {
 };
 
 app.use(unKnownEndPoint);
+
+const errorHanler = (error, request, response, next) => {
+  console.error(error.message);
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHanler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
