@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const cors = require("cors");
+const { response } = require("express");
 
 app.use(express.static("build"));
 app.use(express.json());
@@ -25,10 +26,14 @@ app.get("/api/persons/:id", (request, response) => {
   });
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  Person.deleteOne({ id: request.params.id }).then((persons) => {
-    response.json(persons);
-  });
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.get("/info", (request, response) => {
@@ -80,6 +85,12 @@ app.post("/api/persons", (request, response) => {
     response.send(result);
   });
 });
+
+const unKnownEndPoint = (request, response) => {
+  response.status(404).send({ error: "Unknown Endpoint" });
+};
+
+app.use(unKnownEndPoint);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
